@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "wfh-request-form-client-side-solution",
+    "id": "91fb011e-24fb-43df-bf42-ccbdfd75d890",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.21.1"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "WFHRequestForm description"
+      },
+      "longDescription": {
+        "default": "WFHRequestForm description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "wfh-request-form Feature",
+        "description": "The feature that activates elements of the wfh-request-form solution.",
+        "id": "58d43c73-bc2b-4649-ace0-8e00cbea9b67",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/wfh-request-form.sppkg"
+  }
+}

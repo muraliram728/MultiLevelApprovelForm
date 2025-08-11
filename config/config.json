@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "wfh-request-form-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/wfhRequestForm/WfhRequestFormWebPart.js",
+          "manifest": "./src/webparts/wfhRequestForm/WfhRequestFormWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "WfhRequestFormWebPartStrings": "lib/webparts/wfhRequestForm/loc/{locale}.js"
+  }
+}

@@ -15,3 +15,32 @@
   justify-content: 'center';
   align-items: 'center',
 }
+
+/* Hide top suite navigation */
+#suiteNavWrapper {
+  display: none !important;
+}
+
+/* Hide page header */
+#spPageChrome {
+  display: none !important;
+}
+
+/* Hide left navigation if present */
+#sideNavBox {
+  display: none !important;
+}
+
+/* Hide command bar (edit buttons etc.) */
+#commandBar, .ms-commandBar {
+  display: none !important;
+}
+
+/* Hide the edit page button in modern pages */
+button[title="Edit page"] {
+  display: none !important;
+}
+
+div[data-sp-feature-tag="Comments"] {
+  display: none !important;
+}

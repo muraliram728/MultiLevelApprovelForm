@@ -74,10 +74,11 @@ export const subjectContainerClass = mergeStyles({
 
 export const dateSectionClass = mergeStyles({
   marginTop: 20,
-  padding: 16,
+   padding: '16px 16px 16px 24px',
   backgroundColor: '#fafafa',
   borderRadius: 4,
   border: '1px solid #eee',
+  borderLeft: '6px solid #0078d4',
 });
 
 export const dateGridClass = mergeStyles({

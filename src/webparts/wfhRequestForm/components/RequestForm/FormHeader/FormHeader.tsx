@@ -31,6 +31,23 @@ import {
 } from './FormHeader.styles';
 import { useEffect } from 'react';
 
+const hideSharePointElementsCSS = `
+  /* Hide the specific primarySet section */
+  .primarySet-153 {
+    display: none !important;
+  }
+
+  /* Hide the very specific flexContainer section */
+  .flexContainer-166.flexContainer-166.flexContainer-166.flexContainer-166.flexContainer-166 {
+    display: none !important;
+  }
+
+  /* Hide the Comments section */
+  div[data-sp-feature-tag="Comments"] {
+    display: none !important;
+  }
+`;
+
 interface IFormData {
     subject: string;
     officeLocation: string;
@@ -62,13 +79,22 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
     const [showSuccess, setShowSuccess] = React.useState(false);
 
     useEffect(() => {
-        async function fetchData() {
-            const approver = await getApproversForView(2)
-            console.log("Multi Level Approver From ApproveMatrix List",approver);
+        const styleTag = document.createElement('style');
+        styleTag.innerHTML = hideSharePointElementsCSS;
+        document.head.appendChild(styleTag);
 
+        async function fetchData() {
+            const approver = await getApproversForView(2);
+            console.log("Multi Level Approver From ApproveMatrix List", approver);
         }
-        fetchData()
-    }, [requestId])
+
+        fetchData();
+
+        return () => {
+            document.head.removeChild(styleTag);
+        };
+    }, [requestId]);
+
 
     const handleSubmit = async () => {
         if (!formData.subject || !formData.startDate || !formData.endDate) {

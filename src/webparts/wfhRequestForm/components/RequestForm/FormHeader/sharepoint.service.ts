@@ -20,29 +20,28 @@ export const submitFormData = async (formData: any) => {
   }
 };
 
-// Get one request item by ID
-export const getRequestById = async (id: number) => {
-  try {
-    return await _sp.web.lists
-      .getByTitle("WorkFromHomeRequests")
-      .items.getById(id)();
-  } catch (error) {
-    console.error("Error fetching request:", error);
-    throw error;
-  }
+export const getApproversForView = async (viewNumber: number) => {
+  return await _sp.web.lists
+    .getByTitle("WorkflowMatrix")
+    .items
+    .filter(`CurrentView eq ${viewNumber}`)
+    .orderBy("StepNumber", true)
+    .select("Approver/Title", "Approver/EMail", "StepNumber", "ApproverRole")
+    .expand("Approver")();
 };
 
+export const getRequestById = async (id: number) => {
+  return await _sp.web.lists
+    .getByTitle("WorkFromHomeRequests")
+    .items
+    .getById(id)
+    .select("*")(); // or list specific fields if needed
+};
 
-// Get workflow sequence for given CurrentView
-export const getWorkflowSequence = async (currentView: number) => {
-  try {
-    return await _sp.web.lists
-      .getByTitle("WorkflowMatrix")
-      .items
-      .filter(`CurrentView eq ${currentView}`)
-      .orderBy("StepNumber", true)();
-  } catch (error) {
-    console.error("Error fetching workflow sequence:", error);
-    throw error;
-  }
+export const updateRequest = async (id: number, data: any) => {
+  return await _sp.web.lists
+    .getByTitle("WorkFromHomeRequests")
+    .items
+    .getById(id)
+    .update(data);
 };

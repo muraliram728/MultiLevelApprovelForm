@@ -42,7 +42,7 @@ const RichTextEditor: React.FC<IRichTextEditorProps> = ({ label, value, onChange
                 contentEditable
                 suppressContentEditableWarning
                 style={{
-                    minHeight: 150,
+                    minHeight: 100,
                     border: '1px solid #ccc',
                     padding: 8,
                     borderRadius: 4,

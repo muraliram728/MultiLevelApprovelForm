@@ -13,7 +13,7 @@ import {
 } from '@fluentui/react';
 import RichTextEditor from './RichTextEditor';
 import ButtonBar from './ButtonBar';
-import { submitFormData } from './sharepoint.service';
+import { submitFormData, getApproversForView } from './sharepoint.service';
 
 // Styles
 import {
@@ -27,8 +27,9 @@ import {
     dateSectionClass,
     dateGridClass,
     uploadAreaClass,
-    successMsgClass
+    successMsgClass,
 } from './FormHeader.styles';
+import { useEffect } from 'react';
 
 interface IFormData {
     subject: string;
@@ -40,7 +41,7 @@ interface IFormData {
 }
 
 interface Props {
-  requestId: number;
+    requestId: number;
 }
 
 const officeOptions: IDropdownOption[] = [
@@ -59,6 +60,15 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
         comments: ''
     });
     const [showSuccess, setShowSuccess] = React.useState(false);
+
+    useEffect(() => {
+        async function fetchData() {
+            const approver = await getApproversForView(2)
+            console.log("Multi Level Approver From ApproveMatrix List",approver);
+
+        }
+        fetchData()
+    }, [requestId])
 
     const handleSubmit = async () => {
         if (!formData.subject || !formData.startDate || !formData.endDate) {
@@ -97,21 +107,25 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
         }
     };
 
+
     return (
         <div className={formContainerClass}>
             {/* Header */}
-            <Text variant="xLarge" styles={{
-                root: {
-                    fontWeight: 600,
-                    marginBottom: '32px',
-                    color: '#0078d4',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '12px'
-                }
-            }}>
-                <Icon iconName="Work" styles={{ root: { fontSize: '24px' } }} />
+            <Text
+                variant="xLarge"
+                styles={{
+                    root: {
+                        fontWeight: 600,
+                        marginBottom: 24,
+                        color: '#0078d4',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 12,
+                    },
+                }}
+            >
+                <Icon iconName="Work" styles={{ root: { fontSize: 24 } }} />
                 Work From Home Request Form
             </Text>
 
@@ -121,21 +135,21 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
                 <div>
                     <div className={formItemClass}>
                         <Text className={labelClass}>
-                            <Icon iconName="Contact" styles={{ root: { marginRight: '8px' } }} />
+                            <Icon iconName="Contact" styles={{ root: { marginRight: 8 } }} />
                             Requester
                         </Text>
                         <Text className={valueClass}>Prathusha</Text>
                     </div>
                     <div className={formItemClass}>
                         <Text className={labelClass}>
-                            <Icon iconName="CityNext" styles={{ root: { marginRight: '8px' } }} />
+                            <Icon iconName="CityNext" styles={{ root: { marginRight: 8 } }} />
                             Department
                         </Text>
                         <Text className={valueClass}>Information Technology</Text>
                     </div>
                     <div className={formItemClass}>
                         <Text className={labelClass}>
-                            <Icon iconName="Mail" styles={{ root: { marginRight: '8px' } }} />
+                            <Icon iconName="Mail" styles={{ root: { marginRight: 8 } }} />
                             Email
                         </Text>
                         <Text className={valueClass}>Prathusha@amlakfinance.com</Text>
@@ -146,27 +160,33 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
                 <div>
                     <div className={formItemClass}>
                         <Text className={labelClass}>
-                            <Icon iconName="Phone" styles={{ root: { marginRight: '8px' } }} />
+                            <Icon iconName="Phone" styles={{ root: { marginRight: 8 } }} />
                             Contact Details
                         </Text>
                         <Text className={valueClass}>-</Text>
                     </div>
                     <div className={formItemClass}>
                         <Text className={labelClass}>
-                            <Icon iconName="WorkforceManagement" styles={{ root: { marginRight: '8px' } }} />
+                            <Icon iconName="WorkforceManagement" styles={{ root: { marginRight: 8 } }} />
                             Job Title
                         </Text>
                         <Text className={valueClass}>UI Developer</Text>
                     </div>
                     <div className={formItemClass}>
                         <Text className={labelClass}>
-                            <Icon iconName="POI" styles={{ root: { marginRight: '8px' } }} />
+                            <Icon iconName="POI" styles={{ root: { marginRight: 8 } }} />
                             Office Location *
                         </Text>
                         <Dropdown
                             options={officeOptions}
                             selectedKey={formData.officeLocation}
-                            onChange={(_, option) => setFormData({ ...formData, officeLocation: option?.key.toString() || 'head' })}
+                            onChange={(_, option) =>
+                                setFormData({
+                                    ...formData,
+                                    officeLocation: option?.key.toString() || 'head',
+                                })
+                            }
+                            styles={{ root: { flex: 1, minWidth: 0 } }}
                         />
                     </div>
                 </div>
@@ -174,55 +194,83 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
                 {/* Subject */}
                 <div className={subjectContainerClass}>
                     <TextField
-                        label="Subject *"
+                        label="Subject"
                         required
                         value={formData.subject}
-                        onChange={(_, newValue) => setFormData({ ...formData, subject: newValue || '' })}
+                        onChange={(_, newValue) =>
+                            setFormData({ ...formData, subject: newValue || '' })
+                        }
                         placeholder="Enter your subject"
                     />
                 </div>
             </div>
 
             {/* Dates */}
-            <Text className={sectionHeaderClass}>Work From Home Plan</Text>
-            <div className={dateSectionClass}>
-                <div className={dateGridClass}>
-                    <DatePicker label="Start Date *" onSelectDate={(date) => setFormData({ ...formData, startDate: date || null })} />
-                    <DatePicker label="End Date *" onSelectDate={(date) => setFormData({ ...formData, endDate: date || null })} />
+            <div style={{ marginBottom: '24px' }}>
+                <Text className={sectionHeaderClass}>Work From Home Plan</Text>
+                <div className={dateSectionClass}>
+                    <div className={dateGridClass}>
+                        <DatePicker
+                            label="Start Date *"
+                            value={formData.startDate || undefined}
+                            onSelectDate={(date) => setFormData({ ...formData, startDate: date || null })}
+                        />
+                        <DatePicker
+                            label="End Date *"
+                            value={formData.endDate || undefined}
+                            onSelectDate={(date) => setFormData({ ...formData, endDate: date || null })}
+                        />
+                    </div>
                 </div>
             </div>
 
             {/* Reason */}
-            <Text className={sectionHeaderClass}>Work From Home Reason</Text>
-            <RichTextEditor value={formData.reason} onChange={(value) => setFormData({ ...formData, reason: value })} />
+            <div style={{ marginBottom: '24px' }}>
+                <Text className={sectionHeaderClass}>Work From Home Reason</Text>
+                <RichTextEditor
+                    value={formData.reason}
+                    onChange={(value) => setFormData({ ...formData, reason: value })}
+                />
+            </div>
 
             {/* Attachments */}
-            <Text className={sectionHeaderClass}>Attachments</Text>
-            <Stack tokens={{ childrenGap: 8 }}>
-                <label htmlFor="fileUpload" className={uploadAreaClass}>
-                    <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 12 }}>
-                        <Icon iconName="Upload" styles={{ root: { fontSize: 24, color: '#0078D4' } }} />
-                        <Stack>
-                            <Label>Drag and drop files here or click to upload</Label>
-                            <Text variant="small">Supported formats: PDF, DOC, JPG, PNG (Max 5MB each)</Text>
+            <div style={{ marginBottom: '24px' }}>
+                <Text className={sectionHeaderClass}>Attachments</Text>
+                <Stack tokens={{ childrenGap: 8 }}>
+                    <label htmlFor="fileUpload" className={uploadAreaClass}>
+                        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 12 }}>
+                            <Icon iconName="Upload" styles={{ root: { fontSize: 24, color: '#0078D4' } }} />
+                            <Stack>
+                                <Label>Drag and drop files here or click to upload</Label>
+                                <Text variant="small">
+                                    Supported formats: PDF, DOC, JPG, PNG (Max 5MB each)
+                                </Text>
+                            </Stack>
                         </Stack>
-                    </Stack>
-                    <input id="fileUpload" type="file" accept=".pdf,.doc,.jpg,.png" multiple style={{ display: 'none' }} />
-                </label>
-            </Stack>
+                        <input
+                            id="fileUpload"
+                            type="file"
+                            accept=".pdf,.doc,.jpg,.png"
+                            multiple
+                            style={{ display: 'none' }}
+                        />
+                    </label>
+                </Stack>
+            </div>
 
             {/* Comments */}
             <Text className={sectionHeaderClass}>Additional Comments</Text>
-            <RichTextEditor value={formData.comments} onChange={(value) => setFormData({ ...formData, comments: value })} />
+            <RichTextEditor
+                value={formData.comments}
+                onChange={(value) => setFormData({ ...formData, comments: value })}
+            />
 
             {/* Buttons */}
             <ButtonBar
                 onSubmit={handleSubmit}
                 onSaveDraft={() => console.log('Save Draft clicked')}
-                onCancel={() => console.log('Cancel clicked')}
                 onPrint={() => console.log('Print clicked')}
             />
-
             {showSuccess && (
                 <div className={successMsgClass}>
                     <MessageBar messageBarType={MessageBarType.success}>
@@ -230,7 +278,6 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
                     </MessageBar>
                 </div>
             )}
-
         </div>
     );
 };

@@ -75,7 +75,7 @@ const ButtonBar: React.FC<IButtonBarProps> = ({
   onSaveDraft,
   onSubmit,
   onCancel,
-  onPrint
+  onPrint,
 }) => {
   return (
     <div className={buttonBarClass}>

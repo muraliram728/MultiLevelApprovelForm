@@ -13,7 +13,7 @@ import {
 } from '@fluentui/react';
 import RichTextEditor from './RichTextEditor';
 import ButtonBar from './ButtonBar';
-import { submitFormData, getApproversForView } from './sharepoint.service';
+import { submitFormData, getApproversForView, getCurrentUser, getCurrentWorkflowView } from './sharepoint.service';
 
 // Styles
 import {
@@ -77,6 +77,14 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
         comments: ''
     });
     const [showSuccess, setShowSuccess] = React.useState(false);
+    const [currentUser, setCurrentUser] = React.useState<{
+        Title: string;
+        Email: string;
+        Department: string;
+        JobTitle: string;
+    } | null>(null);
+    
+
 
     useEffect(() => {
         const styleTag = document.createElement('style');
@@ -87,7 +95,12 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
             const approver = await getApproversForView(2);
             console.log("Multi Level Approver From ApproveMatrix List", approver);
         }
+        const loadUser = async () => {
+            const user = await getCurrentUser();
+            setCurrentUser(user);
+        };
 
+        loadUser();
         fetchData();
 
         return () => {
@@ -101,6 +114,13 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
             alert('Please fill all required fields');
             return;
         }
+        if (!currentUser) {
+            alert('User information not loaded yet');
+            return;
+        }
+
+        const currentView = await getCurrentWorkflowView();
+        const approvers = await getApproversForView(currentView);
 
         const listItem = {
             Title: formData.subject,
@@ -109,10 +129,14 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
             EndDate: formData.endDate.toISOString(),
             Reason: formData.reason,
             Comments: formData.comments,
-            Requester: "Prathusha",
-            Department: "Information Technology",
-            Email: "Prathusha@amlakfinance.com",
-            JobTitle: "UI Developer"
+            Requester: currentUser.Title,
+            Department: currentUser.Department,
+            Email: currentUser.Email,
+            JobTitle: currentUser.JobTitle,
+            CurrentView: currentView,
+            CurrentStep: 1,
+            Status: "Pending",
+            ApproverHistory: JSON.stringify(approvers)
         };
 
         try {
@@ -157,79 +181,81 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
 
             {/* Requester Info */}
             <Text className={sectionHeaderClass}>Requester Information</Text>
-            <div className={formGridClass}>
-                <div>
-                    <div className={formItemClass}>
-                        <Text className={labelClass}>
-                            <Icon iconName="Contact" styles={{ root: { marginRight: 8 } }} />
-                            Requester
-                        </Text>
-                        <Text className={valueClass}>Prathusha</Text>
+            {currentUser && (
+                <div className={formGridClass}>
+                    <div>
+                        <div className={formItemClass}>
+                            <Text className={labelClass}>
+                                <Icon iconName="Contact" styles={{ root: { marginRight: 8 } }} />
+                                Requester
+                            </Text>
+                            <Text className={valueClass}>{currentUser.Title}</Text>
+                        </div>
+                        <div className={formItemClass}>
+                            <Text className={labelClass}>
+                                <Icon iconName="CityNext" styles={{ root: { marginRight: 8 } }} />
+                                Department
+                            </Text>
+                            <Text className={valueClass}>{currentUser.Department}</Text>
+                        </div>
+                        <div className={formItemClass}>
+                            <Text className={labelClass}>
+                                <Icon iconName="Mail" styles={{ root: { marginRight: 8 } }} />
+                                Email
+                            </Text>
+                            <Text className={valueClass}>{currentUser.Email}</Text>
+                        </div>
                     </div>
-                    <div className={formItemClass}>
-                        <Text className={labelClass}>
-                            <Icon iconName="CityNext" styles={{ root: { marginRight: 8 } }} />
-                            Department
-                        </Text>
-                        <Text className={valueClass}>Information Technology</Text>
-                    </div>
-                    <div className={formItemClass}>
-                        <Text className={labelClass}>
-                            <Icon iconName="Mail" styles={{ root: { marginRight: 8 } }} />
-                            Email
-                        </Text>
-                        <Text className={valueClass}>Prathusha@amlakfinance.com</Text>
-                    </div>
-                </div>
 
-                {/* Right Column */}
-                <div>
-                    <div className={formItemClass}>
-                        <Text className={labelClass}>
-                            <Icon iconName="Phone" styles={{ root: { marginRight: 8 } }} />
-                            Contact Details
-                        </Text>
-                        <Text className={valueClass}>-</Text>
+                    {/* Right Column */}
+                    <div>
+                        <div className={formItemClass}>
+                            <Text className={labelClass}>
+                                <Icon iconName="Phone" styles={{ root: { marginRight: 8 } }} />
+                                Contact Details
+                            </Text>
+                            <Text className={valueClass}>-</Text>
+                        </div>
+                        <div className={formItemClass}>
+                            <Text className={labelClass}>
+                                <Icon iconName="WorkforceManagement" styles={{ root: { marginRight: 8 } }} />
+                                Job Title
+                            </Text>
+                            <Text className={valueClass}>{currentUser.JobTitle}</Text>
+                        </div>
+                        <div className={formItemClass}>
+                            <Text className={labelClass}>
+                                <Icon iconName="POI" styles={{ root: { marginRight: 8 } }} />
+                                Office Location *
+                            </Text>
+                            <Dropdown
+                                options={officeOptions}
+                                selectedKey={formData.officeLocation}
+                                onChange={(_, option) =>
+                                    setFormData({
+                                        ...formData,
+                                        officeLocation: option?.key.toString() || 'head',
+                                    })
+                                }
+                                styles={{ root: { flex: 1, minWidth: 0 } }}
+                            />
+                        </div>
                     </div>
-                    <div className={formItemClass}>
-                        <Text className={labelClass}>
-                            <Icon iconName="WorkforceManagement" styles={{ root: { marginRight: 8 } }} />
-                            Job Title
-                        </Text>
-                        <Text className={valueClass}>UI Developer</Text>
-                    </div>
-                    <div className={formItemClass}>
-                        <Text className={labelClass}>
-                            <Icon iconName="POI" styles={{ root: { marginRight: 8 } }} />
-                            Office Location *
-                        </Text>
-                        <Dropdown
-                            options={officeOptions}
-                            selectedKey={formData.officeLocation}
-                            onChange={(_, option) =>
-                                setFormData({
-                                    ...formData,
-                                    officeLocation: option?.key.toString() || 'head',
-                                })
+
+                    {/* Subject */}
+                    <div className={subjectContainerClass}>
+                        <TextField
+                            label="Subject"
+                            required
+                            value={formData.subject}
+                            onChange={(_, newValue) =>
+                                setFormData({ ...formData, subject: newValue || '' })
                             }
-                            styles={{ root: { flex: 1, minWidth: 0 } }}
+                            placeholder="Enter your subject"
                         />
                     </div>
                 </div>
-
-                {/* Subject */}
-                <div className={subjectContainerClass}>
-                    <TextField
-                        label="Subject"
-                        required
-                        value={formData.subject}
-                        onChange={(_, newValue) =>
-                            setFormData({ ...formData, subject: newValue || '' })
-                        }
-                        placeholder="Enter your subject"
-                    />
-                </div>
-            </div>
+            )}
 
             {/* Dates */}
             <div style={{ marginBottom: '24px' }}>

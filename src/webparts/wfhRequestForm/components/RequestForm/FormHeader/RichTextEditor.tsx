@@ -10,6 +10,8 @@ interface IRichTextEditorProps {
         toolbar?: React.CSSProperties;
         editor?: React.CSSProperties;
     };
+    readOnly?: boolean;
+    disabled?: boolean; 
 }
 
 const RichTextEditor: React.FC<IRichTextEditorProps> = ({ label, value, onChange }) => {

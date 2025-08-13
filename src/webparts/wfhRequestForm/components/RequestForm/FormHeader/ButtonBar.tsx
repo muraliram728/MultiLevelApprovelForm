@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { 
+import {
   PrimaryButton,
   DefaultButton,
   mergeStyles,
@@ -20,7 +20,7 @@ const buttonBarClass = mergeStyles({
 const buttonStyles: Record<string, IButtonStyles> = {
   submit: {
     root: {
-      backgroundColor: '#0078d4', // Fluent UI primary blue
+      backgroundColor: '#0078d4',
       borderColor: '#0078d4',
       color: '#ffffff'
     },
@@ -31,7 +31,7 @@ const buttonStyles: Record<string, IButtonStyles> = {
   },
   saveDraft: {
     root: {
-      backgroundColor: '#f3f2f1', // Light gray
+      backgroundColor: '#f3f2f1',
       borderColor: '#8a8886',
       color: '#323130'
     },
@@ -54,12 +54,34 @@ const buttonStyles: Record<string, IButtonStyles> = {
   print: {
     root: {
       backgroundColor: '#ffffff',
-      borderColor: '#0078d4', // Blue border
-      color: '#0078d4' // Blue text
+      borderColor: '#0078d4',
+      color: '#0078d4'
     },
     rootHovered: {
       backgroundColor: '#f3f9fd',
       borderColor: '#0078d4'
+    }
+  },
+  approve: {
+    root: {
+      backgroundColor: '#107c10', // Green for approve
+      borderColor: '#107c10',
+      color: '#ffffff'
+    },
+    rootHovered: {
+      backgroundColor: '#0e700e',
+      borderColor: '#0e700e'
+    }
+  },
+  reject: {
+    root: {
+      backgroundColor: '#a80000', // Red for reject
+      borderColor: '#a80000',
+      color: '#ffffff'
+    },
+    rootHovered: {
+      backgroundColor: '#8c0000',
+      borderColor: '#8c0000'
     }
   }
 };
@@ -69,6 +91,10 @@ interface IButtonBarProps {
   onSubmit?: () => void;
   onCancel?: () => void;
   onPrint?: () => void;
+  isReadOnly?: boolean;
+  onApprove?: () => void;
+  onReject?: () => void;
+  isCurrentApprover?: boolean; // Add this new prop
 }
 
 const ButtonBar: React.FC<IButtonBarProps> = ({
@@ -76,7 +102,45 @@ const ButtonBar: React.FC<IButtonBarProps> = ({
   onSubmit,
   onCancel,
   onPrint,
+  isReadOnly = false,
+  onApprove,
+  onReject,
+  isCurrentApprover = false
 }) => {
+  if (isReadOnly) {
+    return (
+      <div className={buttonBarClass}>
+        <Stack horizontal tokens={{ childrenGap: 12 }}>
+          <DefaultButton 
+            text="Print" 
+            iconProps={{ iconName: 'Print' }}
+            onClick={onPrint}
+            styles={buttonStyles.print}
+          />
+          
+          {/* Only show approve/reject if current user is approver */}
+          {isCurrentApprover && (
+            <>
+              <DefaultButton 
+                text="Reject" 
+                iconProps={{ iconName: 'Cancel' }}
+                onClick={onReject}
+                styles={buttonStyles.reject}
+              />
+              <PrimaryButton 
+                text="Approve" 
+                iconProps={{ iconName: 'CheckMark' }}
+                onClick={onApprove}
+                styles={buttonStyles.approve}
+              />
+            </>
+          )}
+        </Stack>
+      </div>
+    );
+  }
+
+  // Default mode (editable form)
   return (
     <div className={buttonBarClass}>
       <Stack horizontal tokens={{ childrenGap: 12 }}>

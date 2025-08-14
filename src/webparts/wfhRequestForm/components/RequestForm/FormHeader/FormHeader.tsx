@@ -13,7 +13,7 @@ import {
 } from '@fluentui/react';
 import RichTextEditor from './RichTextEditor';
 import ButtonBar from './ButtonBar';
-import { submitFormData, getApproversForView, getCurrentUser, getCurrentWorkflowView } from './sharepoint.service';
+import { submitFormData, getApproversForView, getCurrentUser, getCurrentWorkflowView, approveWorkFromHomeRequest } from './sharepoint.service';
 
 // Styles
 import {
@@ -83,7 +83,12 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
         Department: string;
         JobTitle: string;
     } | null>(null);
-    
+    const [isReadOnly, setIsReadOnly] = React.useState(false);
+    const [isCurrentApprover, setIsCurrentApprover] = React.useState(false);
+    const [firstStepApprover, setfirstStepApprover] = React.useState({
+        firstStepcomments: ''
+    })
+    const [generatedRequestId, setGeneratedRequestId] = React.useState<string | null>(null);
 
 
     useEffect(() => {
@@ -99,7 +104,28 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
             const user = await getCurrentUser();
             setCurrentUser(user);
         };
+        const loadUserAndApprovers = async () => {
+            try {
+                // 1. Get current user
+                const user = await getCurrentUser();
+                setCurrentUser(user);
 
+                // 2. Get approvers for this view
+                const approvers = await getApproversForView(2);
+                console.log("Approvers from WorkflowMatrix", approvers);
+
+                // 3. Check if current user is in approvers list
+                const isApprover = approvers.some(
+                    a => a.Approver?.EMail?.toLowerCase() === user?.Email?.toLowerCase()
+                );
+
+                setIsCurrentApprover(isApprover);
+            } catch (err) {
+                console.error("Error loading approvers or user", err);
+            }
+        };
+
+        loadUserAndApprovers();
         loadUser();
         fetchData();
 
@@ -140,15 +166,10 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
         };
 
         try {
-            await submitFormData(listItem);
-            setFormData({
-                subject: '',
-                officeLocation: 'head',
-                startDate: null,
-                endDate: null,
-                reason: '',
-                comments: ''
-            });
+            // CALL SUBMIT ONLY ONCE
+            const result = await submitFormData(listItem);
+            setGeneratedRequestId(result.RequestId);
+            setIsReadOnly(true);
             setShowSuccess(true);
             setTimeout(() => setShowSuccess(false), 5000);
         } catch (error) {
@@ -157,6 +178,20 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
         }
     };
 
+    const handleApprove = async () => {
+        try {
+            if (!generatedRequestId) {
+                alert("RequestId not found. Cannot approve.");
+                return;
+            }
+
+            // Pass the string RequestId directly
+            const result = await approveWorkFromHomeRequest(generatedRequestId);
+            alert("Approved successfully:"+ result)
+        } catch (error) {
+            console.error("Error approving request", error);
+        }
+    };
 
     return (
         <div className={formContainerClass}>
@@ -238,6 +273,7 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
                                     })
                                 }
                                 styles={{ root: { flex: 1, minWidth: 0 } }}
+                                disabled={isReadOnly}
                             />
                         </div>
                     </div>
@@ -252,6 +288,7 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
                                 setFormData({ ...formData, subject: newValue || '' })
                             }
                             placeholder="Enter your subject"
+                            readOnly={isReadOnly}
                         />
                     </div>
                 </div>
@@ -266,11 +303,13 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
                             label="Start Date *"
                             value={formData.startDate || undefined}
                             onSelectDate={(date) => setFormData({ ...formData, startDate: date || null })}
+                            disabled={isReadOnly}
                         />
                         <DatePicker
                             label="End Date *"
                             value={formData.endDate || undefined}
                             onSelectDate={(date) => setFormData({ ...formData, endDate: date || null })}
+                            disabled={isReadOnly}
                         />
                     </div>
                 </div>
@@ -282,6 +321,7 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
                 <RichTextEditor
                     value={formData.reason}
                     onChange={(value) => setFormData({ ...formData, reason: value })}
+                    disabled={isReadOnly}
                 />
             </div>
 
@@ -305,6 +345,7 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
                             accept=".pdf,.doc,.jpg,.png"
                             multiple
                             style={{ display: 'none' }}
+                            disabled={isReadOnly}
                         />
                     </label>
                 </Stack>
@@ -315,13 +356,30 @@ const FormHeader: React.FC<Props> = ({ requestId }) => {
             <RichTextEditor
                 value={formData.comments}
                 onChange={(value) => setFormData({ ...formData, comments: value })}
+                disabled={isReadOnly}
             />
+
+            {isReadOnly && (
+                <div style={{ marginTop: '10px' }}>
+                    <Text className={sectionHeaderClass}>Step1 Approver Comments</Text>
+                    <RichTextEditor
+                        value={firstStepApprover.firstStepcomments}
+                        onChange={(value) => setfirstStepApprover({ firstStepcomments: value })}
+                    />
+                </div>
+
+            )}
 
             {/* Buttons */}
             <ButtonBar
+                isReadOnly={isReadOnly}
+                isCurrentApprover={isCurrentApprover}
                 onSubmit={handleSubmit}
                 onSaveDraft={() => console.log('Save Draft clicked')}
+                onCancel={() => console.log('Cancel clicked')}
                 onPrint={() => console.log('Print clicked')}
+                onApprove={handleApprove}
+                onReject={() => console.log('Rejected')}
             />
             {showSuccess && (
                 <div className={successMsgClass}>

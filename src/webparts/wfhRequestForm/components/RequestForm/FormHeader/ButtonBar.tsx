@@ -111,24 +111,30 @@ const ButtonBar: React.FC<IButtonBarProps> = ({
     return (
       <div className={buttonBarClass}>
         <Stack horizontal tokens={{ childrenGap: 12 }}>
-          <DefaultButton 
-            text="Print" 
+          <DefaultButton
+            text="Print"
             iconProps={{ iconName: 'Print' }}
             onClick={onPrint}
             styles={buttonStyles.print}
           />
-          
-          {/* Only show approve/reject if current user is approver */}
+          <DefaultButton
+            text="Cancel"
+            iconProps={{ iconName: 'Cancel' }}
+            onClick={onCancel}
+            styles={buttonStyles.cancel}
+          />
+
+          {/* Show Approve/Reject only if current user is approver */}
           {isCurrentApprover && (
             <>
-              <DefaultButton 
-                text="Reject" 
+              <DefaultButton
+                text="Reject"
                 iconProps={{ iconName: 'Cancel' }}
                 onClick={onReject}
                 styles={buttonStyles.reject}
               />
-              <PrimaryButton 
-                text="Approve" 
+              <PrimaryButton
+                text="Approve"
                 iconProps={{ iconName: 'CheckMark' }}
                 onClick={onApprove}
                 styles={buttonStyles.approve}
@@ -144,26 +150,26 @@ const ButtonBar: React.FC<IButtonBarProps> = ({
   return (
     <div className={buttonBarClass}>
       <Stack horizontal tokens={{ childrenGap: 12 }}>
-        <DefaultButton 
-          text="Print" 
+        <DefaultButton
+          text="Print"
           iconProps={{ iconName: 'Print' }}
           onClick={onPrint}
           styles={buttonStyles.print}
         />
-        <DefaultButton 
-          text="Cancel" 
+        <DefaultButton
+          text="Cancel"
           iconProps={{ iconName: 'Cancel' }}
           onClick={onCancel}
           styles={buttonStyles.cancel}
         />
-        <DefaultButton 
-          text="Save Draft" 
+        <DefaultButton
+          text="Save Draft"
           iconProps={{ iconName: 'Save' }}
           onClick={onSaveDraft}
           styles={buttonStyles.saveDraft}
         />
-        <PrimaryButton 
-          text="Submit" 
+        <PrimaryButton
+          text="Submit"
           iconProps={{ iconName: 'Send' }}
           onClick={onSubmit}
           styles={buttonStyles.submit}

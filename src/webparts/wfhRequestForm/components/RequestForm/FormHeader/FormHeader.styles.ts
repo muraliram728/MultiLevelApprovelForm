@@ -9,7 +9,6 @@ export const formContainerClass = mergeStyles({
   margin: '0 auto',
   boxSizing: 'border-box',
   border: '1px solid #eaeaea',
-  paddingTop: '1px',
 });
 
 export const sectionHeaderClass = mergeStyles({

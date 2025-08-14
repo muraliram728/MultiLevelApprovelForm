@@ -11,10 +11,10 @@ interface IRichTextEditorProps {
         editor?: React.CSSProperties;
     };
     readOnly?: boolean;
-    disabled?: boolean; 
+    disabled?: boolean;
 }
 
-const RichTextEditor: React.FC<IRichTextEditorProps> = ({ label, value, onChange }) => {
+const RichTextEditor: React.FC<IRichTextEditorProps> = ({ label, value, readOnly, disabled, onChange }) => {
     const editorRef = React.useRef<HTMLDivElement>(null);
 
     const execCmd = (command: string, value?: string) => {
@@ -28,20 +28,24 @@ const RichTextEditor: React.FC<IRichTextEditorProps> = ({ label, value, onChange
 
             {/* Toolbar */}
             <Stack horizontal tokens={{ childrenGap: 5 }} style={{ marginBottom: 5 }}>
-                <IconButton iconProps={{ iconName: 'Bold' }} title="Bold" onClick={() => execCmd('bold')} />
-                <IconButton iconProps={{ iconName: 'Italic' }} title="Italic" onClick={() => execCmd('italic')} />
-                <IconButton iconProps={{ iconName: 'Underline' }} title="Underline" onClick={() => execCmd('underline')} />
-                <IconButton iconProps={{ iconName: 'Strikethrough' }} title="Strikethrough" onClick={() => execCmd('strikeThrough')} />
-                <IconButton iconProps={{ iconName: 'BulletedList' }} title="Bulleted List" onClick={() => execCmd('insertUnorderedList')} />
-                <IconButton iconProps={{ iconName: 'NumberedList' }} title="Numbered List" onClick={() => execCmd('insertOrderedList')} />
-                <IconButton iconProps={{ iconName: 'Undo' }} title="Undo" onClick={() => execCmd('undo')} />
-                <IconButton iconProps={{ iconName: 'Redo' }} title="Redo" onClick={() => execCmd('redo')} />
+                {!disabled && !readOnly && (
+                    <>
+                        <IconButton iconProps={{ iconName: 'Bold' }} title="Bold" onClick={() => execCmd('bold')} />
+                        <IconButton iconProps={{ iconName: 'Italic' }} title="Italic" onClick={() => execCmd('italic')} />
+                        <IconButton iconProps={{ iconName: 'Underline' }} title="Underline" onClick={() => execCmd('underline')} />
+                        <IconButton iconProps={{ iconName: 'Strikethrough' }} title="Strikethrough" onClick={() => execCmd('strikeThrough')} />
+                        <IconButton iconProps={{ iconName: 'BulletedList' }} title="Bulleted List" onClick={() => execCmd('insertUnorderedList')} />
+                        <IconButton iconProps={{ iconName: 'NumberedList' }} title="Numbered List" onClick={() => execCmd('insertOrderedList')} />
+                        <IconButton iconProps={{ iconName: 'Undo' }} title="Undo" onClick={() => execCmd('undo')} />
+                        <IconButton iconProps={{ iconName: 'Redo' }} title="Redo" onClick={() => execCmd('redo')} />
+                    </>
+                )}
             </Stack>
 
             {/* Editable Area */}
             <div
                 ref={editorRef}
-                contentEditable
+                contentEditable={!disabled && !readOnly}
                 suppressContentEditableWarning
                 style={{
                     minHeight: 100,

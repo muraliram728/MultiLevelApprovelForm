@@ -37,14 +37,14 @@ export default class WfhRequestFormWebPart extends BaseClientSideWebPart<IWfhReq
     ReactDom.render(element, this.domElement);
   }
 
-  protected onInit(): Promise<void> {
-    return super.onInit().then(_ => {
-      initializeSP(this.context);
-    });
-    return this._getEnvironmentMessage().then(message => {
-      this._environmentMessage = message;
-    });
+  protected async onInit(): Promise<void> {
+    await super.onInit();
+
+    initializeSP(this.context); // make _sp available in service file
+
+    this._environmentMessage = await this._getEnvironmentMessage();
   }
+
 
 
 
